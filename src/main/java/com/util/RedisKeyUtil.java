@@ -5,6 +5,9 @@ package com.util;
  */
 public class RedisKeyUtil {
 
+    private RedisKeyUtil(){}
+
+
     /**
      * redis的key
      * 形式为：

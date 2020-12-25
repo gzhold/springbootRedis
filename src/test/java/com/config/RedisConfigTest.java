@@ -100,9 +100,11 @@ public class RedisConfigTest {
         userVo.setAddress("北京");
         userVo.setName("jantent");
         userVo.setAge(23);
-//        listOperations.leftPush("list:user",userVo);
+        String key = "list:user";
+        listOperations.leftPush(key,userVo);
 //        System.out.println(listOperations.leftPop("list:user"));
         // pop之后 值会消失
-        System.out.println(listOperations.leftPop("list:user"));
+//        System.out.println(listOperations.leftPop("list:user"));
+        System.out.println(listOperations.range(key, 0, listOperations.size(key)));
     }
 }
