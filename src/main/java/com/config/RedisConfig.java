@@ -122,5 +122,27 @@ public class RedisConfig extends CachingConfigurerSupport {
     public ZSetOperations<String, Object> zSetOperations(RedisTemplate<String, Object> redisTemplate) {
         return redisTemplate.opsForZSet();
     }
+
+
+    /**
+     * HyperLogLog
+     * @param redisTemplate
+     * @return
+     */
+    @Bean
+    public HyperLogLogOperations<String, Object> hyperLogLogOperations(RedisTemplate<String, Object> redisTemplate) {
+        return redisTemplate.opsForHyperLogLog();
+    }
+
+    /**
+     * Geo
+     * @param redisTemplate
+     * @return
+     */
+    @Bean
+    public GeoOperations<String, Object> geoOperations(RedisTemplate<String, Object> redisTemplate) {
+        return redisTemplate.opsForGeo();
+    }
+
 }
 

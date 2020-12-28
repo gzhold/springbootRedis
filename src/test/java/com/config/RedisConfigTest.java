@@ -7,11 +7,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.geo.*;
+import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.*;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +48,14 @@ public class RedisConfigTest {
 
     @Resource
     private RedisService redisService;
+
+    @Autowired
+    private HyperLogLogOperations<String, Object> hyperLogLogOperations;
+
+    @Autowired
+    private GeoOperations<String, Object> geoOperations;
+
+
 
     @Test
     public void testObj() throws Exception{
@@ -107,4 +119,51 @@ public class RedisConfigTest {
 //        System.out.println(listOperations.leftPop("list:user"));
         System.out.println(listOperations.range(key, 0, listOperations.size(key)));
     }
+
+
+    @Test
+    public void testHyperLogLogOperations() {
+        String key = "product_detail";
+        hyperLogLogOperations.delete(key);
+        hyperLogLogOperations.add(key, "1001", "1002", "1003");
+        System.out.println("product_detail count : " + hyperLogLogOperations.size(key));
+
+        String homePageKey = "home_page";
+
+        hyperLogLogOperations.delete(homePageKey);
+        List<String> users = new ArrayList<>();
+        for(int i = 1; i <= 1000; i++) {
+            users.add(String.valueOf(i));
+        }
+        hyperLogLogOperations.add(homePageKey, users.toArray(new String[0]));
+        System.out.println("home_page count : " + hyperLogLogOperations.size(homePageKey));
+
+        System.out.println("count :" + hyperLogLogOperations.union(homePageKey, key));
+    }
+
+    @Test
+    public void testGeoOperations() {
+        String GEO_KEY = "ah-cities";
+
+        Point point = new Point(116.411550, 39.897921);
+        geoOperations.geoAdd(GEO_KEY, point, "mail01");
+
+
+        Distance distance = new Distance(0.5d, Metrics.KILOMETERS);
+        //目标点,后边坐标应该改成可传
+        Point point1 = new Point(116.411573, 39.897958);
+        // 封装覆盖的面积
+        Circle circle = new Circle(point1, distance);
+        GeoResults<RedisGeoCommands.GeoLocation<Object>> geoResults =  geoOperations.geoRadius(GEO_KEY, circle);
+        List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> resultsContent = geoResults.getContent();
+
+        for (GeoResult<RedisGeoCommands.GeoLocation<Object>> geoLocationGeoResult : resultsContent) {
+            RedisGeoCommands.GeoLocation<Object> geoLocation = geoLocationGeoResult.getContent();
+            // 编号
+            String locationId = geoLocation.getName().toString();
+            System.out.println(locationId);
+        }
+    }
+
+
 }
